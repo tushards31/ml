@@ -1,0 +1,61 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+# Step 1: Load dataset
+data = pd.read_csv('pima.csv')
+
+# Step 2: Split into features and target
+X = data.drop(columns='Outcome')
+y = data['Outcome']
+
+# Step 3: Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Step 4: Initialize classifiers
+dt = DecisionTreeClassifier(random_state=42)
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# Step 5: Train models
+dt.fit(X_train, y_train)
+rf.fit(X_train, y_train)
+
+# Step 6: Predict
+y_pred_dt = dt.predict(X_test)
+y_pred_rf = rf.predict(X_test)
+
+# Step 7: Compute metrics
+metrics = ['Accuracy', 'Precision', 'Recall', 'F1 Score']
+dt_scores = [
+    accuracy_score(y_test, y_pred_dt),
+    precision_score(y_test, y_pred_dt),
+    recall_score(y_test, y_pred_dt),
+    f1_score(y_test, y_pred_dt)
+]
+rf_scores = [
+    accuracy_score(y_test, y_pred_rf),
+    precision_score(y_test, y_pred_rf),
+    recall_score(y_test, y_pred_rf),
+    f1_score(y_test, y_pred_rf)
+]
+
+# Step 8: Plot the results
+x = range(len(metrics))
+width = 0.35
+
+plt.figure(figsize=(10, 6))
+plt.bar([p - width/2 for p in x], dt_scores, width=width, label='Decision Tree')
+plt.bar([p + width/2 for p in x], rf_scores, width=width, label='Random Forest')
+plt.xticks(x, metrics)
+plt.ylim(0, 1)
+plt.ylabel('Score')
+plt.title('Performance Comparison: Decision Tree vs Random Forest')
+plt.legend()
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
