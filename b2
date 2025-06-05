@@ -1,0 +1,80 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    ConfusionMatrixDisplay
+)
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Step 1: Load Dataset
+data = pd.read_csv('glass.csv')
+
+# Step 2: Features and Labels
+X = data.drop(columns='Type')  # Features
+y = data['Type']               # Labels (Multiclass)
+
+# Step 3: Preprocessing
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Step 4: Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y, test_size=0.2, random_state=42
+)
+
+# Step 5: Define SVM Models with different kernels
+kernels = ['rbf', 'poly', 'sigmoid']
+results = {}
+
+for kernel in kernels:
+    model = SVC(kernel=kernel)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    # Store evaluation metrics
+    results[kernel] = {
+        'Accuracy': accuracy_score(y_test, y_pred),
+        'Precision': precision_score(y_test, y_pred, average='macro', zero_division=0),
+        'Recall': recall_score(y_test, y_pred, average='macro', zero_division=0),
+        'F1 Score': f1_score(y_test, y_pred, average='macro', zero_division=0)
+    }
+
+    # Show Confusion Matrix
+    ConfusionMatrixDisplay.from_estimator(model, X_test, y_test)
+    plt.title(f"Confusion Matrix - {kernel.upper()} Kernel")
+    plt.show()
+
+# Step 6: Plot Comparison
+metrics = ['Accuracy', 'Precision', 'Recall', 'F1 Score']
+x = np.arange(len(metrics))
+width = 0.2
+
+plt.figure(figsize=(10, 6))
+for i, kernel in enumerate(kernels):
+    plt.bar(
+        x + i * width,
+        [results[kernel][m] for m in metrics],
+        width=width,
+        label=kernel
+    )
+
+plt.xticks(x + width, metrics)
+plt.ylabel('Score')
+plt.title('SVM Kernel Comparison on glass.csv')
+plt.ylim(0, 1)
+plt.legend()
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# Step 7: Print Results
+for kernel in kernels:
+    print(f"\n--- {kernel.upper()} Kernel ---")
+    for metric in metrics:
+        print(f"{metric}: {results[kernel][metric]:.4f}")
