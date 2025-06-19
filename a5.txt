@@ -1,0 +1,38 @@
+ import pandas as pd
+ import numpy as np
+ import matplotlib.pyplot as plt
+ # Load and visualize data
+ data = pd.read_csv('/content/linear_Salary_Data.csv')
+ plt.scatter(data['YearsExperience'], data['Salary'], color='blue')
+ plt.title('Salary vs Experience')
+ plt.xlabel('Years of Experience')
+ plt.ylabel('Salary')
+ plt.show()
+ # Correlation matrix
+ print(data.corr())
+ # Prepare data
+ x = data['YearsExperience'].values
+ y = data['Salary'].values
+# slope (m) and intercept (c)
+ m = sum((x - np.mean(x)) * (y - np.mean(y))) / sum((x - np.mean(x)) ** 2)
+ c = np.mean(y) - m * np.mean(x)
+ print(f"Slope (m): {m:.2f}")
+ print(f"Intercept (c): {c:.2f}")
+ # Predict
+ y_pred = m * x + c
+ # Plot regression line
+ plt.scatter(x, y, color='blue', label='Actual')
+ plt.plot(x, y_pred, color='red', label='Predicted Line')
+ plt.title('Linear Regression Fit')
+ plt.xlabel('Years of Experience')
+ plt.ylabel('Salary')
+ plt.legend()
+ plt.show()
+ sse=sum((y-y_pred)**2)
+ print(f"SSE: {sse:.2f}")
+ ss_res = sum((y_pred - np.mean(y)) ** 2)
+ print(f"SSR: {ss_res:.2f}")
+ ss_total = sse+ss_res
+ print(f"{ss_total:.2f}")
+ r2 = (ss_res / ss_total)
+ print(f"R² Score: {r2:.3f}")
